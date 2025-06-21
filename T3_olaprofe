@@ -1,0 +1,93 @@
+
+
+laberinto = [
+    ['F','1','1','3','0','1','1','1','4'],
+    ['3','0','0','1','0','1','0','0','1'],
+    ['1','1','0','1','1','1','1','0','1'],
+    ['0','1','0','1','0','0','1','0','1'],
+    ['1','1','1','1','1','1','3','1','1'],
+    ['3','0','1','0','0','0','1','0','1'],
+    ['1','1','1','1','3','1','1','1','1'],
+    ['1','0','0','1','0','1','0','0','4'],
+    ['I','1','3','1','0','1','1','1','1']
+]
+
+
+lab = []
+for fila in laberinto:
+    fila_val = []
+    for celda in fila:
+        if celda == '0':
+            fila_val.append(0)
+        elif celda in ['I', 'F']:
+            fila_val.append(1)
+        else:
+            fila_val.append(int(celda))
+    lab.append(fila_val)
+
+filas, cols = 9, 9
+inicio = (8, 0)
+fin = (0, 0)
+
+visitado = [[False]*cols for _ in range(filas)]
+camino_encontrado = []
+intentos = [0]
+encontrado = [False]
+
+def backtrack(i, j, puntos, camino):
+    intentos[0] += 1
+    if encontrado[0]:
+        return
+
+    if i < 0 or i >= filas or j < 0 or j >= cols:
+        return
+    if lab[i][j] == 0 or visitado[i][j]:
+        return
+
+    camino.append((i, j))
+    visitado[i][j] = True
+
+    if (i, j) != inicio and (i, j) != fin:
+        puntos += lab[i][j]
+
+    if (i, j) == fin:
+        if puntos == 23:
+            camino_encontrado.extend(camino)
+            encontrado[0] = True
+        camino.pop()
+        visitado[i][j] = False
+        return
+
+    
+    backtrack(i - 1, j, puntos, camino)
+    backtrack(i, j + 1, puntos, camino)
+    backtrack(i + 1, j, puntos, camino)
+    backtrack(i, j - 1, puntos, camino)
+
+    camino.pop()
+    visitado[i][j] = False
+
+
+print("Laberinto original:")
+for fila in laberinto:
+    print(' '.join(fila))
+
+camino_temp = []
+backtrack(inicio[0], inicio[1], 0, camino_temp)
+
+if camino_encontrado:
+    print(f"\n Camino encontrado con exactamente 23 puntos en {intentos[0]} intentos.")
+    print(f"Pasos: {len(camino_encontrado)} casillas")
+    print("Camino (coordenadas):", camino_encontrado)
+
+    
+    resultado = [fila[:] for fila in laberinto]
+    for i, j in camino_encontrado:
+        if resultado[i][j] not in ['I', 'F']:
+            resultado[i][j] = '*'
+
+    print("\nLaberinto con camino marcado:")
+    for fila in resultado:
+        print(' '.join(fila))
+else:
+    print(f"\n No se encontró ningún camino con exactamente 23 puntos después de {intentos[0]} intentos.")
